@@ -132,10 +132,10 @@ def create_train_state(model_cls,
                            dummy_input, integration_timesteps,
                            )
     if batchnorm:
-        params = variables["params"].unfreeze()
+        params = variables["params"] # .unfreeze()
         batch_stats = variables["batch_stats"]
     else:
-        params = variables["params"].unfreeze()
+        params = variables["params"] # .unfreeze()
         # Note: `unfreeze()` is for using Optax.
 
     if opt_config in ["standard"]:
