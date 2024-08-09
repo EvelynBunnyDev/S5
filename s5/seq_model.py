@@ -474,14 +474,14 @@ class AutoencoderModel(nn.Module):
         x = self.decoder_output(x)
         
         if return_latents:
-            return np.exp(x), latents
+            return np.exp(x), latents # TODO: how to store latents?
         else:
-            return np.exp(x)
+            return np.exp(x), None
 
 # Here we call vmap to parallelize across a batch of input sequences
 BatchAutoencoderModel = nn.vmap(
     AutoencoderModel,
-    in_axes=(0, 0),
+    in_axes=(0, 0, None),
     out_axes=0,
     variable_axes={"params": None, "dropout": None, 'batch_stats': None, "cache": 0, "prime": None},
     split_rngs={"params": False, "dropout": True}, axis_name='batch')
