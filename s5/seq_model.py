@@ -379,7 +379,7 @@ class AutoregressiveModel(nn.Module):
         x = self.encoder(x, integration_timesteps)
     
         x = self.decoder(x)
-        return x # np.exp(x)
+        return np.exp(x)
 
 # Here we call vmap to parallelize across a batch of input sequences
 BatchAutoregressiveModel = nn.vmap(
@@ -456,7 +456,7 @@ class AutoencoderModel(nn.Module):
                                         )
         self.decoder_output = nn.Dense(self.d_output)
         
-    def __call__(self, x, integration_timesteps, return_latents=False):
+    def __call__(self, x, integration_timesteps, return_latents=True):
         """
         Compute the size d_output log softmax output given a
         Lxd_input input sequence.
