@@ -1,4 +1,4 @@
 Traceback (most recent call last):
-  File "/home/groups/swl1/evsong/S5/scripts/autoencoder_real_data.py", line 22, in <module>
-    import matplotlib
-ModuleNotFoundError: No module named 'matplotlib'
+  File "/home/groups/swl1/evsong/S5/scripts/autoencoder_real_data.py", line 25, in <module>
+    from sklearn.linear_model import LinearRegression
+ModuleNotFoundError: No module named 'sklearn'

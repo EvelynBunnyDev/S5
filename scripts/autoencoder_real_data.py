@@ -45,11 +45,6 @@ from s5.ssm_init import make_DPLR_HiPPO
 from s5 import dataloading
 from s5 import seq_model
 from s5 import train_helpers
-<<<<<<< HEAD
-=======
-
-# TODO: set dictionary w hyperparameters
->>>>>>> d9cb236119836401bccf195571555a40be696bc9
 
 ssm_size = 256
 ssm_lr = 1e-3
