@@ -46,6 +46,8 @@ from S5.s5 import dataloading
 from S5.s5 import seq_model
 from S5.s5 import train_helpers
 
+# TODO: set dictionary w hyperparameters
+
 ssm_size = 256
 ssm_lr = 1e-3
 blocks = 8
