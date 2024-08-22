@@ -35,8 +35,7 @@ tfd = tfp.distributions
 
 from tqdm import tqdm
 import optax
-
-# importlib.reload(S5.s5.seq_model)
+import wandb
 
 # Initializing the S5 model
 from s5.seq_model import AutoencoderModel, BatchAutoencoderModel
@@ -49,16 +48,16 @@ from s5 import train_helpers
 ssm_size = 256
 ssm_lr = 1e-3
 blocks = 8
+
 # determine the size of initial blocks
-block_size = int(ssm_size / blocks)
+block_size = int(config['ssm_size'] / config['blocks'])
 
 # Set global learning rate lr (e.g. encoders, etc.) as function of ssm_lr
-lr_factor = 1.0
-lr = lr_factor * ssm_lr
+lr = config['lr_factor'] * config['ssm_lr']
 
 # Set randomness...
 print("[*] Setting Randomness...")
-key = random.PRNGKey(13)
+key = random.PRNGKey(config['key'])
 init_rng, train_rng = random.split(key, num=2)
 
 padded = False
