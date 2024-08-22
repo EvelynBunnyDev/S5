@@ -474,7 +474,7 @@ class AutoencoderModel(nn.Module):
         x = self.decoder_output(x)
         
         if return_latents:
-            return np.exp(x), latents # TODO: how to store latents?
+            return np.exp(x), latents
         else:
             return np.exp(x), None
 
