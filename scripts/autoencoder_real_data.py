@@ -35,8 +35,7 @@ tfd = tfp.distributions
 
 from tqdm import tqdm
 import optax
-
-# importlib.reload(S5.s5.seq_model)
+import wandb
 
 # Initializing the S5 model
 from s5.seq_model import AutoencoderModel, BatchAutoencoderModel
@@ -47,20 +46,46 @@ from s5 import seq_model
 from s5 import train_helpers
 
 # TODO: set dictionary w hyperparameters
+# parameters we want to track in wandb
+default_config = dict(
+    ssm_size = 256,
+    ssm_lr = 1e-3,
+    blocks = 8,
+    lr_factor = 1.0,
+    # model parameters
+    N = 100,    # hidden state dim
+    U = 3,      # input dim
+    O = 1,      # output dimension
+    # got rid of K for now, set to R by default
+    #K = 2,      # NM sigmoid dimension (must be 1 or R)
+    # Model Hyperparameters
+    tau = 10,
+    # Timing (task) parameters
+    dt = 10,#ms
+    # Data Generation
+    T = 110,
+    measure_min = 10,
+    measure_max = 20,
+    intervals = [[12, 14, 16, 18]],
+    delay = 15,
+    # Training
+    num_full_train_iters = 50_000,
+    key = 13,
+)
 
-ssm_size = 256
-ssm_lr = 1e-3
-blocks = 8
+projectname = "vanilla-rnn-mwg"
+wandb.init(config=default_config, project=projectname, entity='nm-rnn')
+config = wandb.config
+
 # determine the size of initial blocks
-block_size = int(ssm_size / blocks)
+block_size = int(config['ssm_size'] / config['blocks'])
 
 # Set global learning rate lr (e.g. encoders, etc.) as function of ssm_lr
-lr_factor = 1.0
-lr = lr_factor * ssm_lr
+lr = config['lr_factor'] * config['ssm_lr']
 
 # Set randomness...
 print("[*] Setting Randomness...")
-key = random.PRNGKey(13)
+key = random.PRNGKey(config['key'])
 init_rng, train_rng = random.split(key, num=2)
 
 padded = False
