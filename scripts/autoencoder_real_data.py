@@ -160,7 +160,7 @@ def objective(params, vars, inputs, integration_timesteps, targets, dropout_rng)
 # Data Loading
 data_seq_len = 100
 
-data = np.load('Low_Pisa_0430_Processed_Full.npz')
+data = np.load('/scratch/users/evsong/Low_Pisa_0430_Processed_Full.npz')
 print("Available arrays:", data.files)
 print(data['reward'].shape, data['ys'].shape, data['xs'].shape) # ys = 357087 time steps, 216 features
 data_y = data['ys']
