@@ -39,12 +39,12 @@ import optax
 # importlib.reload(S5.s5.seq_model)
 
 # Initializing the S5 model
-from S5.s5.seq_model import AutoencoderModel, BatchAutoencoderModel
-from S5.s5.ssm import init_S5SSM
-from S5.s5.ssm_init import make_DPLR_HiPPO
-from S5.s5 import dataloading
-from S5.s5 import seq_model
-from S5.s5 import train_helpers
+from s5.seq_model import AutoencoderModel, BatchAutoencoderModel
+from s5.ssm import init_S5SSM
+from s5.ssm_init import make_DPLR_HiPPO
+from s5 import dataloading
+from s5 import seq_model
+from s5 import train_helpers
 
 ssm_size = 256
 ssm_lr = 1e-3
