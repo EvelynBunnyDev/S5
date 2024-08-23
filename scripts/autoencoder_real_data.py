@@ -53,23 +53,22 @@ default_config = dict(
     blocks = 8,
     lr_factor = 1.0,
     # model parameters
-    N = 100,    # hidden state dim
-    U = 3,      # input dim
-    O = 1,      # output dimension
-    # got rid of K for now, set to R by default
-    #K = 2,      # NM sigmoid dimension (must be 1 or R)
+    d_model = 256, 
+    n_layers = 3,
+    d_latent=3, # bottleneck dimension
+    d_output = 216, # output dim for ssm layer
+    data_seq_len = 100, # input sequence length
+    ratio = 0.85, # Training proportion
+    bsz = 32,
     # Model Hyperparameters
-    tau = 10,
+    
     # Timing (task) parameters
-    dt = 10,#ms
-    # Data Generation
-    T = 110,
-    measure_min = 10,
-    measure_max = 20,
-    intervals = [[12, 14, 16, 18]],
-    delay = 15,
+    dt_min = 0.001,
+    dt_max = 0.1,
     # Training
-    num_full_train_iters = 50_000,
+    num_iters = 200,
+    learning_rate = 1e-3,
+    keep_rate = 0.95,
     key = 13,
 )
 
@@ -97,7 +96,7 @@ Lambda, _, B, V, B_orig = make_DPLR_HiPPO(block_size)
 conj_sym = True
 if conj_sym:
     block_size = block_size // 2
-    ssm_size = ssm_size // 2
+    config['ssm_size'] = config['ssm_size'] // 2
 
 Lambda = Lambda[:block_size]
 V = V[:, :block_size]
@@ -105,24 +104,24 @@ Vc = V.conj().T
 
 # If initializing state matrix A as block-diagonal, put HiPPO approximation
 # on each block
-Lambda = (Lambda * jnp.ones((blocks, block_size))).ravel()
-V = block_diag(*([V] * blocks))
-Vinv = block_diag(*([Vc] * blocks))
+Lambda = (Lambda * jnp.ones((config['blocks'], block_size))).ravel()
+V = block_diag(*([V] * config['blocks']))
+Vinv = block_diag(*([Vc] * config['blocks']))
 
 print("Lambda.shape={}".format(Lambda.shape))
 print("V.shape={}".format(V.shape))
 print("Vinv.shape={}".format(Vinv.shape))
 
-d_model = 256 # input dim
+d_model = config['d_model'] # input dim
 C_init = 'trunc_standard_normal'
 discretization = 'zoh'
-dt_min = 0.001
-dt_max = 0.1
+dt_min = config['dt_min']
+dt_max = config['dt_max']
 clip_eigs = False
 bidirectional = False
 
 ssm_init_fn = init_S5SSM(H=d_model,
-                          P=ssm_size,
+                          P=config['ssm_size'],
                           Lambda_re_init=Lambda.real,
                           Lambda_im_init=Lambda.imag,
                           V=V,
@@ -142,14 +141,14 @@ BatchAutoencoderModel = nn.vmap(
     variable_axes={"params": None, "dropout": None, 'batch_stats': None, "cache": 0, "prime": None},
     split_rngs={"params": False, "dropout": True}, axis_name='batch')
 
-n_layers = 3
+n_layers = config['n_layers']
 activation_fn = 'half_glu1'
 p_dropout = 0.0 # Range 0.0 - 1.0 for dropout proportions
 prenorm= False
 batchnorm= True
 bn_momentum= 0.95
-d_output=216 # output dim for ssm layer
-d_latent=3 # TODO
+d_output = config['d_output']
+d_latent = config['d_latent']
 
 model_cls = partial(
     BatchAutoencoderModel,
@@ -185,7 +184,7 @@ def objective(params, vars, inputs, integration_timesteps, targets, dropout_rng)
     return loss, vars
 
 # Data Loading
-data_seq_len = 100
+data_seq_len = config['data_seq_len']
 
 data = np.load('/scratch/users/evsong/Low_Pisa_0430_Processed_Full.npz')
 print("Available arrays:", data.files)
@@ -203,7 +202,7 @@ class SpikesDataset(Dataset):
         # Split ys into chunks with data_seq_len
         return self.data[idx * data_seq_len : (idx + 1) * data_seq_len]
 
-ratio = 0.85 # Training proportion
+ratio = config['ratio']
 dataset = SpikesDataset(data_y)
 train_sz = int(ratio * len(dataset))
 test_sz = len(dataset) - train_sz
@@ -211,7 +210,7 @@ test_sz = len(dataset) - train_sz
 # Create dataset instances
 train_dataset, test_dataset = random_split(dataset, [train_sz, test_sz])
 
-bsz = 32
+bsz = config['bsz']
 ys_train_loader = DataLoader(train_dataset, batch_size=bsz, shuffle=True, drop_last=True)
 ys_test_loader = DataLoader(test_dataset, batch_size=bsz, shuffle=False, drop_last=True)
 
@@ -254,17 +253,17 @@ def dropout(x, key, keep_rate):
 grad_obj = jit(grad(objective, has_aux=True))
 objective = jit(objective)
 
-learning_rate = 1e-3 # TODO
+learning_rate = config['learning_rate']
 optimizer = optax.adam(learning_rate)
 
-num_iters = 200
+num_iters = config['num_iters']
 losses = []
 eval_losses = []
 
 best_loss = np.inf
 best_params = None
 
-keep_rate = 0.95
+keep_rate = config['keep_rate']
 
 train_len = len(ys_train_loader)
 test_len = len(ys_test_loader)
