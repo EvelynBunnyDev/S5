@@ -53,7 +53,7 @@ default_config = dict(
     blocks = 8,
     lr_factor = 1.0,
     # model parameters
-    d_model = 256, 
+    d_model = 256,
     n_layers = 3,
     d_latent=3, # bottleneck dimension
     d_output = 216, # output dim for ssm layer
@@ -61,7 +61,7 @@ default_config = dict(
     ratio = 0.85, # Training proportion
     bsz = 32,
     # Model Hyperparameters
-    
+
     # Timing (task) parameters
     dt_min = 0.001,
     dt_max = 0.1,

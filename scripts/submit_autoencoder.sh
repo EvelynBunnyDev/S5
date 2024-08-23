@@ -13,8 +13,6 @@ conda activate myenv
 
 ml cuda/12.2.0
 ml cudnn/8.9.0.131
-ml py-jax/0.4.7_py39
-ml py-jaxlib/0.4.7_py39
 ml viz
 ml py-matplotlib/3.7.1_py39
 ml math
