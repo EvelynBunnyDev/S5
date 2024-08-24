@@ -65,7 +65,7 @@ default_config = dict(
     dt_min = 0.001,
     dt_max = 0.1,
     # Training
-    num_iters = 200,
+    num_iters = 15,
     learning_rate = 1e-3,
     keep_rate = 0.95,
     key = 13,
