@@ -300,19 +300,18 @@ for i in tqdm(range(num_iters)):
         params = optax.apply_updates(params, updates)
 
         loss = vars['loss']
+        wandb.log({"loss": loss})
         print("\nLoss:", loss)
         avg_train_loss += loss / train_len
 
         batch_cnt += 1
-
-    # print("Avg Train Loss:", avg_train_loss)
 
     print("\nEval:")
     for ys_in_batch_eval in tqdm(ys_test_loader, total=test_len):
         ys_in_batch_eval = jnp.array(ys_in_batch_eval.numpy())
         # compute eval loss
         eval_loss, _ = objective(params, vars, ys_in_batch_eval, integration_timesteps_x, ys_in_batch_eval, skey)
-
+    
         avg_eval_loss += eval_loss / test_len
 
     if avg_eval_loss < best_loss:
@@ -323,6 +322,8 @@ for i in tqdm(range(num_iters)):
 
     losses.append(avg_train_loss)
     eval_losses.append(avg_eval_loss)
+    wandb.log({"avg_train_loss": avg_train_loss})
+    wandb.log({"eval_loss": avg_eval_loss})
 
 # Set a threshold to filter out outliers
 thr = 50000
