@@ -1,4 +1,4 @@
 Traceback (most recent call last):
-  File "/home/groups/swl1/evsong/S5/scripts/autoencoder_real_data.py", line 25, in <module>
-    from sklearn.linear_model import LinearRegression
-ModuleNotFoundError: No module named 'sklearn'
+  File "/home/groups/swl1/evsong/S5/scripts/autoencoder_real_data.py", line 14, in <module>
+    import jax
+ModuleNotFoundError: No module named 'jax'

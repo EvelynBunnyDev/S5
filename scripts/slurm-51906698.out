@@ -1,0 +1,33 @@
+
+CondaError: Run 'conda init' before 'conda activate'
+
+Lmod Warning:
+-------------------------------------------------------------------------------
+The following dependent module(s) are not currently loaded: cuda/12.2.0
+(required by: cudnn/8.9.0.131)
+-------------------------------------------------------------------------------
+
+
+
+
+The following have been reloaded with a version change:
+  1) cuda/12.2.0 => cuda/12.1.1
+
+Lmod Warning:
+-------------------------------------------------------------------------------
+The following dependent module(s) are not currently loaded: cuda/12.2.0
+(required by: cudnn/8.9.0.131)
+-------------------------------------------------------------------------------
+
+
+
+Lmod Warning:
+-------------------------------------------------------------------------------
+The following dependent module(s) are not currently loaded: cuda/12.2.0
+(required by: cudnn/8.9.0.131)
+-------------------------------------------------------------------------------
+
+
+
+srun: error: sh03-17n12: task 0: Exited with exit code 1
+srun: Terminating StepId=51906698.0

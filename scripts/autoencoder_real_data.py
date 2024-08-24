@@ -72,7 +72,7 @@ default_config = dict(
     key = 13,
 )
 
-projectname = "vanilla-rnn-mwg"
+projectname = "s5_autoencoder"
 wandb.init(config=default_config, project=projectname, entity='nm-rnn')
 config = wandb.config
 
