@@ -45,7 +45,6 @@ from s5 import dataloading
 from s5 import seq_model
 from s5 import train_helpers
 
-# TODO: set dictionary w hyperparameters
 # parameters we want to track in wandb
 default_config = dict(
     ssm_size = 256,
@@ -73,7 +72,7 @@ default_config = dict(
 )
 
 projectname = "s5_autoencoder"
-wandb.init(config=default_config, project=projectname, entity='nm-rnn')
+wandb.init(config=default_config, project=projectname)
 config = wandb.config
 
 # determine the size of initial blocks
@@ -96,8 +95,10 @@ Lambda, _, B, V, B_orig = make_DPLR_HiPPO(block_size)
 conj_sym = True
 if conj_sym:
     block_size = block_size // 2
-    config['ssm_size'] = config['ssm_size'] // 2
-
+    ssm_size = config['ssm_size'] // 2
+else:
+    ssm_size = config['ssm_size']
+    
 Lambda = Lambda[:block_size]
 V = V[:, :block_size]
 Vc = V.conj().T
@@ -121,7 +122,7 @@ clip_eigs = False
 bidirectional = False
 
 ssm_init_fn = init_S5SSM(H=d_model,
-                          P=config['ssm_size'],
+                          P=ssm_size,
                           Lambda_re_init=Lambda.real,
                           Lambda_im_init=Lambda.imag,
                           V=V,
