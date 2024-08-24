@@ -17,6 +17,8 @@ from jax import random, grad, jit
 from jax.scipy.linalg import block_diag
 import numpy as np
 import numpy.random as npr
+import os
+import pickle
 
 import importlib
 import matplotlib
@@ -51,7 +53,7 @@ default_config = dict(
     ssm_lr = 1e-3,
     blocks = 8,
     lr_factor = 1.0,
-    # model parameters
+    # Model Hyperparameters
     d_model = 256,
     n_layers = 3,
     d_latent=3, # bottleneck dimension
@@ -59,8 +61,6 @@ default_config = dict(
     data_seq_len = 100, # input sequence length
     ratio = 0.85, # Training proportion
     bsz = 32,
-    # Model Hyperparameters
-
     # Timing (task) parameters
     dt_min = 0.001,
     dt_max = 0.1,
@@ -74,6 +74,19 @@ default_config = dict(
 projectname = "s5_autoencoder"
 wandb.init(config=default_config, project=projectname)
 config = wandb.config
+
+def log_wandb_model(model, name, type):
+    trained_model_artifact = wandb.Artifact(name,type=type)
+    if not os.path.isdir('models'): os.mkdir('models')
+    subdirectory = wandb.run.name
+    filepath = os.path.join('models', subdirectory)
+    try: os.mkdir(filepath)
+    except: filepath=filepath
+    obs_outfile = open(os.path.join(filepath, "model"), 'wb')
+    pickle.dump(model, obs_outfile)
+    obs_outfile.close()
+    trained_model_artifact.add_dir(filepath)
+    wandb.log_artifact(trained_model_artifact)
 
 # determine the size of initial blocks
 block_size = int(config['ssm_size'] / config['blocks'])
@@ -317,6 +330,8 @@ for i in tqdm(range(num_iters)):
     if avg_eval_loss < best_loss:
         best_loss = eval_loss
         best_params = params.copy()
+        
+    log_wandb_model(params, "auen{}".format(config['data_seq_len'], config['learning_rate']), 'model')
 
     print(f"\nEpoch {i} || Train Loss: {avg_train_loss:.4f} || Eval Loss: {avg_eval_loss:.4f}")
 
