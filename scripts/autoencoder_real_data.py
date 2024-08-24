@@ -331,8 +331,9 @@ for i in tqdm(range(num_iters)):
         best_loss = eval_loss
         best_params = params.copy()
         
-    log_wandb_model(params, "auen{}".format(config['data_seq_len'], config['learning_rate']), 'model')
+        log_wandb_model(best_params, "autoencoder_{}_best".format(config['data_seq_len'], config['learning_rate']), 'model')
 
+        
     print(f"\nEpoch {i} || Train Loss: {avg_train_loss:.4f} || Eval Loss: {avg_eval_loss:.4f}")
 
     losses.append(avg_train_loss)
@@ -340,58 +341,16 @@ for i in tqdm(range(num_iters)):
     wandb.log({"avg_train_loss": avg_train_loss})
     wandb.log({"eval_loss": avg_eval_loss})
 
+    log_wandb_model(params, "autoencoder_{}_last".format(config['data_seq_len'], config['learning_rate']), 'model')
+
 # Set a threshold to filter out outliers
-thr = 50000
+thr = 100000
 
 filtered_losses = [loss if loss <= thr else None for loss in losses]
 filtered_eval_losses = [loss if loss <= thr else None for loss in eval_losses]
 
-plt.figure(figsize=[10,4])
-plt.subplot(121)
-plt.plot(filtered_losses)
-plt.xlabel("iteration")
-plt.ylabel("train loss")
-plt.subplot(122)
-plt.plot(filtered_eval_losses)
-plt.xlabel("iteration")
-plt.ylabel("eval loss")
+# # Save the ys_train image
+# plt.imsave('ys_train_image.png', ys_train[0].T)
 
-outputs, vars = model.apply(
-    {"params": params, "batch_stats": vars["batch_stats"]},
-    ys_train[:bsz], integration_timesteps_x, True,
-    rngs={"dropout": dropout_rng},
-    mutable=["intermediates", "batch_stats"],
-)
-
-plt.figure(figsize=(10, 5))
-plt.subplot(121)
-plt.imshow(lambdas_train[0].T, aspect="auto", vmin=0, vmax=5)
-plt.title('Ground Truth Rates')
-plt.colorbar()
-
-plt.subplot(122)
-rates, latents = outputs
-plt.imshow(rates[0].T, aspect="auto", vmin=0, vmax=5)
-plt.title('Model Outputs')
-plt.colorbar()
-
-xs_true = xs_train[:bsz]
-lr = LinearRegression().fit(np.vstack(latents), np.vstack(xs_true))
-xs_transformed = np.array([lr.predict(latent_i) for latent_i in latents])
-
-tr_idx = 0
-D = xs_train.shape[2]
-
-y_axis_scale = 3
-plt.figure()
-plt.plot(xs_true[tr_idx] + y_axis_scale*np.arange(D), 'k')
-plt.plot(xs_transformed[tr_idx] + y_axis_scale*np.arange(D), 'c', alpha=0.7)
-
-plt.title('Comparison of Latents')
-legend_elements = [Line2D([0], [0], color='k', lw=2, label='Ground Truth'),
-                   Line2D([0], [0], color='c', lw=2, label='Model Learned')]
-plt.legend(handles=legend_elements, loc='best')
-
-plt.figure()
-plt.imshow(ys_train[0].T)
-plt.colorbar()
+# # Close all figures to avoid memory leaks
+# plt.close('all')
